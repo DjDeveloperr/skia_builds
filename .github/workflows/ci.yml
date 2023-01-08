@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v2
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: 'v1.x'
+
+      - name: Check Formatting
+        run: deno fmt --check
+
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: 'v1.x'
+      
+      - name: Setup Skia Repo
+        run: git clone https://github.com/google/skia
+
+      - name: Setup Depot Tools (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          echo "PATH=$(pwd)/depot_tools:$PATH" >> $GITHUB_ENV
+
+      - name: Setup Depot Tools (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          curl -o depot_tools.zip https://storage.googleapis.com/chrome-infra/depot_tools.zip
+          mkdir depot_tools
+          cd depot_tools
+          7z x ../depot_tools.zip
+          cd ..
+          echo "PATH=$(pwd)/depot_tools;$PATH" >> $GITHUB_ENV
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install xorg-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libgl1-mesa-glx libglx-dev
+
+      - name: Build Skia
+        run: deno run -A --unstable build_skia.ts
+
+      - name: Release
+        uses: softprops/action-gh-release@master
+        if: ${{ github.ref == 'refs/heads/main' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "release draft"
+          draft: true
+          files: |
+            skia/out/Release/*.dll
+            skia/out/Release/*.so
+            skia/out/Release/*.dylib
