@@ -97,7 +97,7 @@ if (Deno.build.os === "windows") {
 
 BUILD_ARGS["extra_cflags_cc"] += "]";
 
-Deno.chdir(new URL("../skia", import.meta.url));
+Deno.chdir(new URL("./skia", import.meta.url));
 
 const SLICE_WIN = Deno.build.os === "windows" ? 1 : 0;
 
@@ -106,7 +106,7 @@ const $ = (cmd: string | URL, ...args: string[]) => {
   const c = typeof cmd === "string" ? cmd : cmd.pathname.slice(SLICE_WIN);
   new Deno.Command(c, {
     args,
-    cwd: new URL("../skia", import.meta.url),
+    cwd: new URL("./skia", import.meta.url),
     stdin: "null",
     stdout: "inherit",
     stderr: "inherit",
@@ -122,7 +122,7 @@ if (!Deno.args.includes("skip-sync-deps")) {
 
 if (Deno.build.os === "windows") {
   const SkLoadICU = new URL(
-    "../skia/third_party/icu/SkLoadICU.cpp",
+    "./skia/third_party/icu/SkLoadICU.cpp",
     import.meta.url,
   );
   const original = Deno.readTextFileSync(SkLoadICU);
@@ -139,7 +139,7 @@ if (Deno.build.os === "windows") {
 }
 
 $(
-  new URL("../skia/bin/gn", import.meta.url),
+  new URL("./skia/bin/gn", import.meta.url),
   "gen",
   "out/Release",
   "--args=" + Object.entries(BUILD_ARGS).map(([k, v]) => `${k}=${v}`).join(" "),
