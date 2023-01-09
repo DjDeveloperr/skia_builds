@@ -31,6 +31,11 @@ jobs:
         with:
           repository: google/skia
           path: skia
+      
+      - name: Get Skia Commit Hash
+        id: vars
+        shell: bash
+        run: echo "::set-output name=commit::$(cd skia && git rev-parse --short HEAD)"
 
       - name: Setup Depot Tools (Unix)
         if: runner.os != 'Windows'
@@ -63,8 +68,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "skia-${{ steps.skia.outputs.commit }}-${{ runner.os }}"
+          tag_name: "skia-${{ steps.vars.outputs.commit }}-${{ runner.os }}"
           draft: true
           files: |
             skia/out/Release/*.a
             skia/out/Release/*.lib
+            skia/out/Release/*.dat
