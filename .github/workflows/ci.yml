@@ -26,7 +26,11 @@ jobs:
           deno-version: 'v1.x'
       
       - name: Setup Skia Repo
-        run: git clone https://github.com/google/skia
+        id: skia
+        uses: actions/checkout@v3
+        with:
+          repository: git clone https://github.com/google/skia
+          path: skia
 
       - name: Setup Depot Tools (Unix)
         if: runner.os != 'Windows'
@@ -59,9 +63,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "release draft"
+          tag_name: "skia-${{ steps.skia.outputs.commit }}-${{ runner.os }}"
           draft: true
           files: |
-            skia/out/Release/*.dll
-            skia/out/Release/*.so
-            skia/out/Release/*.dylib
+            skia/out/Release/*.a
+            skia/out/Release/*.lib
