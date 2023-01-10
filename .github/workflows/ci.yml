@@ -62,9 +62,13 @@ jobs:
       - name: Build Skia
         run: deno run -A --unstable build_skia.ts
         
-      - name: Zip
-        shell: bash
-        run: zip -r skia-${{ runner.os }} ./skia/out/Release -i '*.a' '*.lib' '*.dat'
+      - name: Zip (Unix)
+        if: runner.os != 'Windows'
+        run: zip -r skia-${{ runner.os }} ./skia/out/Release -i '*.a' '*.dat'
+      
+      - name: Zip (Windows)
+        if: runner.os == 'Windows'
+        run: Get-ChildItem -Path .\skia\out\Release -Include *.lib, *.dat | Compress-Archive -DestinationPath skia-Windows.zip
 
       - name: Release
         uses: softprops/action-gh-release@master
