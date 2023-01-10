@@ -61,6 +61,10 @@ jobs:
 
       - name: Build Skia
         run: deno run -A --unstable build_skia.ts
+        
+      - name: Zip
+        shell: bash
+        run: zip -r skia-${{ runner.os }} ./skia/out/Release -i '*.a' '*.lib' '*.dat'
 
       - name: Release
         uses: softprops/action-gh-release@master
@@ -68,9 +72,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "skia-${{ steps.vars.outputs.commit }}-${{ runner.os }}"
+          tag_name: "skia-${{ steps.vars.outputs.commit }}"
           draft: true
           files: |
-            skia/out/Release/*.a
-            skia/out/Release/*.lib
-            skia/out/Release/*.dat
+            skia-Windows.zip
+            skia-Linux.zip
+            skia-macOS.zip
