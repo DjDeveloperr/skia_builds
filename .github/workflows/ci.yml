@@ -62,8 +62,13 @@ jobs:
       - name: Build Skia
         run: deno run -A --unstable build_skia.ts
         
-      - name: Zip
+      - name: Zip (Unix)
+        if: runner.os != 'Windows'
         run: zip -r skia-${{ runner.os }} ./skia/out/Release -i '*.a' '*.dat'
+
+      - name: Zip (Windows)
+        if: runner.os == 'Windows'
+        run: 7z a skia-${{ runner.os }}.zip ./skia/out/Release/*.lib ./skia/out/Release/*.dll ./skia/out/Release/*.dat
 
       - name: Release
         uses: softprops/action-gh-release@master
