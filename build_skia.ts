@@ -35,7 +35,6 @@ const BUILD_ARGS: Record<string, any> = {
   paragraph_tests_enabled: false,
   skia_enable_android_utils: false,
   skia_enable_discrete_gpu: true,
-  skia_enable_particles: true,
   skia_enable_pdf: true,
   skia_enable_skshaper: true,
   skia_enable_svg: true,
